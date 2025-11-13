@@ -22,7 +22,7 @@ Sistema básico de gestión de parqueadero desarrollado con **Flask + SQLAlchemy
 ## Instalación
 
 ```bash
-git clone https://github.com/tuusuario/parking_backend.git
+git clone https://github.com/ocastelblack/parking_backend
 cd parking_backend
 pip install -r requirements.txt
 python app.py
