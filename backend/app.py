@@ -5,8 +5,10 @@ from sqlalchemy.exc import IntegrityError
 from models import db, Vehicle
 from config import Config
 from utils.error_handlers import register_error_handlers
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
 app.config.from_object(Config)
 db.init_app(app)
 swagger = Swagger(app)
@@ -122,8 +124,23 @@ def actualizar_vehiculo(id):
     data = request.get_json()
 
     for campo in ['plate', 'type', 'is_electric', 'entry_time', 'exit_time', 'slot']:
-        if campo in data:
-            setattr(vehiculo, campo, data[campo])
+      if campo in data:
+          valor = data[campo]
+
+          # Convertir fechas solo si vienen válidas
+          if campo in ['entry_time', 'exit_time']:
+              if isinstance(valor, str) and valor.strip():
+                  try:
+                      valor = datetime.fromisoformat(valor)
+                  except ValueError:
+                      return jsonify({
+                          "success": False,
+                          "message": f"Formato inválido para {campo}. Usa ISO8601 (YYYY-MM-DDTHH:MM:SS)"
+                      }), 400
+              elif not valor:
+                  valor = None
+
+          setattr(vehiculo, campo, valor)
 
     if vehiculo.exit_time:
         vehiculo.cost = calcular_costo(vehiculo)
